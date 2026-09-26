@@ -79,7 +79,15 @@ jobs:
           role-session-name: context7-bedrock-${{ github.run_id }}
 
       - name: Test
-        run: pnpm test
+        # This fork has no upstream Bedrock credentials: the tools-ai-sdk
+        # suite makes live AWS calls. Still lint/build/typecheck the full
+        # monorepo, and run the complete Pi suite that Foundry consumes.
+        run: |
+          if [ "$GITHUB_REPOSITORY" = "upstash/context7" ]; then
+            pnpm test
+          else
+            pnpm --filter @upstash/context7-pi test
+          fi
         env:
           CONTEXT7_API_KEY: ${{ secrets.CONTEXT7_API_KEY }}
 
