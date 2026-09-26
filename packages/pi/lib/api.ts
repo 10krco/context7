@@ -21,7 +21,9 @@ function authHeaders(): Record<string, string> {
 
 function checkedInput(value: string, name: string): string {
   if (!value.trim() || value.length > MAX_QUERY_CHARS || /[\x00-\x1f\x7f]/.test(value)) {
-    throw new Error(`Invalid Context7 ${name}: nonempty public-doc text of at most ${MAX_QUERY_CHARS} characters is required`);
+    throw new Error(
+      `Invalid Context7 ${name}: nonempty public-doc text of at most ${MAX_QUERY_CHARS} characters is required`
+    );
   }
   return value;
 }
@@ -79,7 +81,11 @@ async function parseErrorResponse(response: Response): Promise<string> {
   return `Request failed with status ${response.status}. Please try again later.`;
 }
 
-export async function searchLibraries(query: string, libraryName: string, signal?: AbortSignal): Promise<SearchResponse> {
+export async function searchLibraries(
+  query: string,
+  libraryName: string,
+  signal?: AbortSignal
+): Promise<SearchResponse> {
   const url = new URL(`${BASE_URL}/v2/libs/search`);
   url.searchParams.set("query", checkedInput(query, "query"));
   url.searchParams.set("libraryName", checkedInput(libraryName, "library name"));
@@ -91,7 +97,11 @@ export async function searchLibraries(query: string, libraryName: string, signal
   return JSON.parse(await boundedText(response)) as SearchResponse;
 }
 
-export async function fetchLibraryContext(query: string, libraryId: string, signal?: AbortSignal): Promise<string> {
+export async function fetchLibraryContext(
+  query: string,
+  libraryId: string,
+  signal?: AbortSignal
+): Promise<string> {
   const url = new URL(`${BASE_URL}/v2/context`);
   url.searchParams.set("query", checkedInput(query, "query"));
   url.searchParams.set("libraryId", checkedInput(libraryId, "library ID"));
