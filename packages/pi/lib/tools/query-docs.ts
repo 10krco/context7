@@ -19,8 +19,8 @@ export const queryDocsTool: ToolDefinition<typeof Params, undefined> = {
   label: QUERY_DOCS_TITLE,
   description: QUERY_DOCS_DESCRIPTION,
   parameters: Params,
-  async execute(_toolCallId: string, params: Static<typeof Params>) {
-    const text = await fetchLibraryContext(params.query, params.libraryId);
+  async execute(_toolCallId: string, params: Static<typeof Params>, signal?: AbortSignal) {
+    const text = await fetchLibraryContext(params.query, params.libraryId, signal);
     return toToolResult(text);
   },
 };

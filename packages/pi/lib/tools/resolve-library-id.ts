@@ -20,8 +20,8 @@ export const resolveLibraryIdTool: ToolDefinition<typeof Params, undefined> = {
   label: RESOLVE_LIBRARY_ID_TITLE,
   description: RESOLVE_LIBRARY_ID_DESCRIPTION,
   parameters: Params,
-  async execute(_toolCallId: string, params: Static<typeof Params>) {
-    const searchResponse = await searchLibraries(params.query, params.libraryName);
+  async execute(_toolCallId: string, params: Static<typeof Params>, signal?: AbortSignal) {
+    const searchResponse = await searchLibraries(params.query, params.libraryName, signal);
     if (!searchResponse.results || searchResponse.results.length === 0) {
       return toToolResult(searchResponse.error ?? "No libraries found matching the provided name.");
     }
