@@ -1,0 +1,30 @@
+name: Foundry Pi package
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      # Exercise exactly the Git-subdirectory package Foundry installs. A
+      # broad monorepo build alone can miss a broken Pi extension entrypoint.
+      - run: npm install --prefix packages/pi --ignore-scripts --no-audit --no-fund
+      - run: npm run --prefix packages/pi typecheck
+      - run: npm run --prefix packages/pi test
+      - name: Inspect packed Pi resources
+        working-directory: packages/pi
+        run: |
+          npm pack --dry-run --json > /tmp/context7-pi-pack.json
+          node -e 'const p=require("/tmp/context7-pi-pack.json")[0]; for (const file of ["extensions/context7.ts", "lib/api.ts", "LICENSE"]) if (!p.files.some(f=>f.path===file)) process.exitCode=1'
