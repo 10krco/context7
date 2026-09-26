@@ -63,6 +63,28 @@ describe("bounded Context7 transport", () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
+  it("does not mistake cancellation of an HTTP error body for a completed tool result", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (_url: URL, options: RequestInit) => {
+        const body = new ReadableStream<Uint8Array>({
+          start(controller) {
+            options.signal?.addEventListener(
+              "abort",
+              () => controller.error(new DOMException("cancelled", "AbortError")),
+              { once: true }
+            );
+          },
+        });
+        return new Response(body, { status: 503 });
+      })
+    );
+    const abort = new AbortController();
+    const pending = searchLibraries("React hooks", "React", abort.signal);
+    abort.abort();
+    await expect(pending).rejects.toMatchObject({ name: "AbortError" });
+  });
+
   it("returns bounded error text without treating HTTP errors as healthy results", async () => {
     vi.stubGlobal(
       "fetch",

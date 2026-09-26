@@ -59,8 +59,11 @@ async function boundedText(response: Response): Promise<string> {
 }
 
 async function parseErrorResponse(response: Response): Promise<string> {
+  // A failed/aborted body read is not a usable HTTP error message. Only a
+  // malformed JSON payload may fall back to the status-based diagnostic.
+  const text = await boundedText(response);
   try {
-    const json = JSON.parse(await boundedText(response)) as { message?: unknown };
+    const json = JSON.parse(text) as { message?: unknown };
     if (typeof json.message === "string") return json.message.slice(0, 300);
   } catch {
     // The status below remains useful if the error body is not JSON.
